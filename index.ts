@@ -13,11 +13,16 @@ app.use(express.json());
 app.use(cors());
 
 const port = process.env.PORT || 3900;
+const ApiKey = process.env.APIKEY;
 
 app.listen(port, (): void => {
     console.log(`Server is running on port ${port}`);
 });
 
-app.get('/', (req: Request, res: Response): void => {
-    res.send('Hello Farts');
+app.get('/:key', (req: Request, res: Response): void => {
+    if (req.params.key === ApiKey) {
+        res.send("Hello Farts");
+    } else {
+        res.send('What are you doing here?');
+    }
 });
