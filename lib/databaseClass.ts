@@ -102,10 +102,10 @@ export class DBMethods {
 		});
 	}
 
-	removePerson(tableName: string, firstName: string, lastName: string, id: number): Promise<string[]> {
+	deletePerson(tableName: string, id: number): Promise<string[]> {
 		return new Promise<string[]>((resolve, reject) => {
 			const database = this.dbConnection;
-			const neededSql = `DELETE FROM ${tableName} WHERE firstName = "${firstName}" AND lastName = "${lastName}" AND id = ${id};`;
+			const neededSql = `DELETE FROM ${tableName} WHERE id = ${id};`;
 
 			database.query(neededSql, (err: string[], results: string[]) => {
 				err ? reject(err) : resolve(results);
@@ -148,6 +148,18 @@ export class DBMethods {
 			});
 			this.endDb();
 		});
-	}
+    }
+    
+    logoutUser(table: string, column: string, id: number, idColumn: string): Promise<string[]> {
+        return new Promise<string[]>((resolve, reject) => {
+            const database = this.dbConnection;
+            const neededSql = `UPDATE ${table} set ${column} = 0 WHERE ${idColumn} = ${id};`;
+
+            database.query(neededSql, (err: string[], results: string[]) => {
+                err ? reject(err) : resolve(results);
+            });
+            this.endDb();
+        });
+    }
 
 }

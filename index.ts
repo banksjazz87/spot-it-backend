@@ -96,3 +96,31 @@ app.put('/update-user/:key', (req: Request, res: Response): void => {
             console.log('ERROR ', err);
         });
 });
+
+app.delete('/delete-user/:key', (req: Request, res: Response): void => {
+    const DB = new DBMethods(dbHost, dbUser, dbName, dbPassword);
+
+    DB.deletePerson('users', req.body.id)
+        .then((data: string[]): void => {
+            res.send({
+                "status": 200,
+                "message": "1 user has been deleted"
+            })
+            console.log('Success', data);
+        })
+        .catch((err: SQLResponse): void => {
+            res.send({
+                "status": 500,
+                "message": DB.getSqlError(err)
+            });
+            console.log('Error in deleting a user ', err);
+        });
+});
+
+
+app.put('/login/:key', (req: Request, res: Response): void => {
+    const DB = new DBMethods(dbHost, dbUser, dbName, dbPassword); 
+
+
+})
+

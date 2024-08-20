@@ -85,3 +85,21 @@ app.put('/update-user/:key', (req, res) => {
         console.log('ERROR ', err);
     });
 });
+app.delete('/delete-user/:key', (req, res) => {
+    const DB = new databaseClass_1.DBMethods(dbHost, dbUser, dbName, dbPassword);
+    DB.deletePerson('users', req.body.id)
+        .then((data) => {
+        res.send({
+            "status": 200,
+            "message": "1 user has been deleted"
+        });
+        console.log('Success', data);
+    })
+        .catch((err) => {
+        res.send({
+            "status": 500,
+            "message": DB.getSqlError(err)
+        });
+        console.log('Error in deleting a user ', err);
+    });
+});

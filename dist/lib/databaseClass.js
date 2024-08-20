@@ -85,10 +85,10 @@ class DBMethods {
             this.endDb();
         });
     }
-    removePerson(tableName, firstName, lastName, id) {
+    deletePerson(tableName, id) {
         return new Promise((resolve, reject) => {
             const database = this.dbConnection;
-            const neededSql = `DELETE FROM ${tableName} WHERE firstName = "${firstName}" AND lastName = "${lastName}" AND id = ${id};`;
+            const neededSql = `DELETE FROM ${tableName} WHERE id = ${id};`;
             database.query(neededSql, (err, results) => {
                 err ? reject(err) : resolve(results);
             });
