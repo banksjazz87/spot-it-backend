@@ -125,5 +125,25 @@ class DBMethods {
             this.endDb();
         });
     }
+    logoutUser(table, id, idColumn) {
+        return new Promise((resolve, reject) => {
+            const database = this.dbConnection;
+            const neededSql = `UPDATE ${table} set loggedIn = 0, lastSeen = CURRENT_TIMESTAMP  WHERE ${idColumn} = ${id};`;
+            database.query(neededSql, (err, results) => {
+                err ? reject(err) : resolve(results);
+            });
+            this.endDb();
+        });
+    }
+    loginUser(table, idColumn, id) {
+        return new Promise((resolve, reject) => {
+            const database = this.dbConnection;
+            const neededSql = `UPDATE ${table} set loggedIn = 1, lastLoggedIn = CURRENT_TIMESTAMP WHERE ${idColumn} = ${id};`;
+            database.query(neededSql, (err, results) => {
+                err ? reject(err) : resolve(results);
+            });
+            this.endDb();
+        });
+    }
 }
 exports.DBMethods = DBMethods;
