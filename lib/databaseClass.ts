@@ -150,10 +150,10 @@ export class DBMethods {
 		});
     }
     
-    logoutUser(table: string, column: string, id: number, idColumn: string): Promise<string[]> {
+    logoutUser(table: string, id: number, idColumn: string): Promise<string[]> {
         return new Promise<string[]>((resolve, reject) => {
             const database = this.dbConnection;
-            const neededSql = `UPDATE ${table} set ${column} = 0 WHERE ${idColumn} = ${id};`;
+            const neededSql = `UPDATE ${table} set loggedIn = 0  WHERE ${idColumn} = ${id};`;
 
             database.query(neededSql, (err: string[], results: string[]) => {
                 err ? reject(err) : resolve(results);
@@ -161,5 +161,20 @@ export class DBMethods {
             this.endDb();
         });
     }
+
+
+    loginUser(table: string, idColumn: string, id: number): Promise<string[]> {
+        return new Promise<string[]>((resolve, reject) => {
+            const database = this.dbConnection;
+            const neededSql = `UPDATE ${table} set loggedIn = 0, lastLoggedIn = CURRENT_TIMESTAMP WHERE ${idColumn} = ${id};`;
+
+            database.query(neededSql, (err: string[], results: string[]) => {
+                err ? reject(err) : resolve(results);
+            });
+            this.endDb();
+        });
+    }
+
+    
 
 }
