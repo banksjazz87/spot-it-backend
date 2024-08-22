@@ -158,3 +158,29 @@ app.put("/logout-user/:key", (req: Request, res: Response): void => {
             console.log('Error in the logout method ', err);
         });
 });
+
+app.get('/get-valid-user/:key', (req: Request, res: Response): void => {
+    const DB = new DBMethods(dbHost, dbUser, dbName, dbPassword);
+    const password = crypto.createHash("sha256", req.body.password);
+    const encodedPassword = password.digest("hex");
+    const userName = req.body.userName;
+
+    DB.getValidUser('users', 'username', userName, 'password', encodedPassword)
+        .then((data: string[]): void => {
+            res.send({
+                "status": 200,
+                "valid": true,
+                "message": `Valid user`,
+                "data": data
+            })
+            console.log('Success in getting the user ', data)
+        })
+        .catch((err: SQLResponse): void => {
+            res.send({
+                "status": 500,
+                "valid": false,
+                "message": `An error has occurred in validating ${userName}`
+            })
+            console.log('Error in get valid user ', err)
+        });
+})

@@ -58,8 +58,6 @@ export class DBMethods {
 		});
 	}
 
-
-
 	insert(table: string, columns: string, values: string[]): Promise<string[]> {
 		return new Promise<string[]>((resolve, reject) => {
 			const database = this.dbConnection;
@@ -148,12 +146,37 @@ export class DBMethods {
 			});
 			this.endDb();
 		});
-    }
-    
-    logoutUser(table: string, id: number, idColumn: string): Promise<string[]> {
-        return new Promise<string[]>((resolve, reject) => {
+	}
+
+	logoutUser(table: string, id: number, idColumn: string): Promise<string[]> {
+		return new Promise<string[]>((resolve, reject) => {
+			const database = this.dbConnection;
+			const neededSql = `UPDATE ${table} set loggedIn = 0, lastSeen = CURRENT_TIMESTAMP  WHERE ${idColumn} = ${id};`;
+
+			database.query(neededSql, (err: string[], results: string[]) => {
+				err ? reject(err) : resolve(results);
+			});
+			this.endDb();
+		});
+	}
+
+	loginUser(table: string, idColumn: string, id: number): Promise<string[]> {
+		return new Promise<string[]>((resolve, reject) => {
+			const database = this.dbConnection;
+			const neededSql = `UPDATE ${table} set loggedIn = 1, lastLoggedIn = CURRENT_TIMESTAMP WHERE ${idColumn} = ${id};`;
+
+			database.query(neededSql, (err: string[], results: string[]) => {
+				err ? reject(err) : resolve(results);
+			});
+			this.endDb();
+		});
+	}
+
+    getValidUser(table: string, userColumn: string, userName: string, passwordColumn: string, password: string): Promise<string[]> {
+
+        return new Promise((resolve, reject) => {
             const database = this.dbConnection;
-            const neededSql = `UPDATE ${table} set loggedIn = 0, lastSeen = CURRENT_TIMESTAMP  WHERE ${idColumn} = ${id};`;
+            const neededSql = `SELECT * FROM ${table} WHERE ${userColumn} = "${userName}" AND ${passwordColumn} = "${password}";`;
 
             database.query(neededSql, (err: string[], results: string[]) => {
                 err ? reject(err) : resolve(results);
@@ -161,20 +184,4 @@ export class DBMethods {
             this.endDb();
         });
     }
-
-
-    loginUser(table: string, idColumn: string, id: number): Promise<string[]> {
-        return new Promise<string[]>((resolve, reject) => {
-            const database = this.dbConnection;
-            const neededSql = `UPDATE ${table} set loggedIn = 1, lastLoggedIn = CURRENT_TIMESTAMP WHERE ${idColumn} = ${id};`;
-
-            database.query(neededSql, (err: string[], results: string[]) => {
-                err ? reject(err) : resolve(results);
-            });
-            this.endDb();
-        });
-    }
-
-    
-
 }
