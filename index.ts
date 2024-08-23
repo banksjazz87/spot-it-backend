@@ -43,8 +43,10 @@ app.post("/add-user/:key", (req: Request, res: Response): void => {
 		const DB = new DBMethods(dbHost, dbUser, dbName, dbPassword);
 		const columns = "email, username, password, loggedIn";
 
-		const password = crypto.createHash("sha256", req.body.password);
-		const encodedPassword = password.digest("hex");
+		const password = req.body.password;
+        // const encodedPassword = password.digest("hex");
+        
+        const encodedPassword = crypto.createHash('sha256').update(password).digest('hex');
 
 		const values = [req.body.email, req.body.username, encodedPassword, 1];
 
@@ -161,8 +163,10 @@ app.put("/logout-user/:key", (req: Request, res: Response): void => {
 
 app.get('/get-valid-user/:key', (req: Request, res: Response): void => {
     const DB = new DBMethods(dbHost, dbUser, dbName, dbPassword);
-    const password = crypto.createHash("sha256", req.body.password);
-    const encodedPassword = password.digest("hex");
+    const password = req.body.password;
+    const encodedPassword = crypto.createHash("sha256").update(password).digest("hex");
+
+    console.log("password here ", encodedPassword);
     const userName = req.body.userName;
 
     DB.getValidUser('users', 'username', userName, 'password', encodedPassword)

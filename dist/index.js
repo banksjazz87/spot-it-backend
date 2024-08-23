@@ -38,8 +38,9 @@ app.post("/add-user/:key", (req, res) => {
     if (req.params.key === ApiKey) {
         const DB = new databaseClass_1.DBMethods(dbHost, dbUser, dbName, dbPassword);
         const columns = "email, username, password, loggedIn";
-        const password = crypto_1.default.createHash("sha256", req.body.password);
-        const encodedPassword = password.digest("hex");
+        const password = req.body.password;
+        // const encodedPassword = password.digest("hex");
+        const encodedPassword = crypto_1.default.createHash('sha256').update(password).digest('hex');
         const values = [req.body.email, req.body.username, encodedPassword, 1];
         DB.insert("users", columns, values)
             .then((data) => {
@@ -143,8 +144,9 @@ app.put("/logout-user/:key", (req, res) => {
 });
 app.get('/get-valid-user/:key', (req, res) => {
     const DB = new databaseClass_1.DBMethods(dbHost, dbUser, dbName, dbPassword);
-    const password = crypto_1.default.createHash("sha256", req.body.password);
-    const encodedPassword = password.digest("hex");
+    const password = req.body.password;
+    const encodedPassword = crypto_1.default.createHash("sha256").update(password).digest("hex");
+    console.log("password here ", encodedPassword);
     const userName = req.body.userName;
     DB.getValidUser('users', 'username', userName, 'password', encodedPassword)
         .then((data) => {
