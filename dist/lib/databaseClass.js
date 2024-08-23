@@ -145,10 +145,10 @@ class DBMethods {
             this.endDb();
         });
     }
-    getValidUser(table, userColumn, userName, passwordColumn, password) {
+    getValidUser(table, userEmailColumn, userEmail, passwordColumn, password) {
         return new Promise((resolve, reject) => {
             const database = this.dbConnection;
-            const neededSql = `SELECT * FROM ${table} WHERE ${userColumn} = "${userName}" AND ${passwordColumn} = "${password}";`;
+            const neededSql = `SELECT * FROM ${table} WHERE ${userEmailColumn} = "${userEmail}" AND ${passwordColumn} = "${password}";`;
             database.query(neededSql, (err, results) => {
                 err ? reject(err) : resolve(results);
             });

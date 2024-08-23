@@ -7,8 +7,8 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const body_parser_1 = __importDefault(require("body-parser"));
-const crypto_1 = __importDefault(require("crypto"));
 const databaseClass_1 = require("./lib/databaseClass");
+const EncryptClass_1 = __importDefault(require("./lib/EncryptClass"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 //Middleware functions
@@ -38,9 +38,8 @@ app.post("/add-user/:key", (req, res) => {
     if (req.params.key === ApiKey) {
         const DB = new databaseClass_1.DBMethods(dbHost, dbUser, dbName, dbPassword);
         const columns = "email, username, password, loggedIn";
-        const password = req.body.password;
-        // const encodedPassword = password.digest("hex");
-        const encodedPassword = crypto_1.default.createHash('sha256').update(password).digest('hex');
+        const password = new EncryptClass_1.default(req.body.password);
+        const encodedPassword = password.getEncodedPassword();
         const values = [req.body.email, req.body.username, encodedPassword, 1];
         DB.insert("users", columns, values)
             .then((data) => {
@@ -68,8 +67,8 @@ app.post("/add-user/:key", (req, res) => {
 });
 app.put("/update-user/:key", (req, res) => {
     const DB = new databaseClass_1.DBMethods(dbHost, dbUser, dbName, dbPassword);
-    const password = crypto_1.default.createHash("sha256", req.body.password);
-    const encodedPassword = password.digest("hex");
+    const password = new EncryptClass_1.default(req.body.password);
+    const encodedPassword = password.getEncodedPassword();
     DB.updatePerson("users", req.body, encodedPassword)
         .then((data) => {
         res.send({
@@ -144,11 +143,10 @@ app.put("/logout-user/:key", (req, res) => {
 });
 app.get('/get-valid-user/:key', (req, res) => {
     const DB = new databaseClass_1.DBMethods(dbHost, dbUser, dbName, dbPassword);
-    const password = req.body.password;
-    const encodedPassword = crypto_1.default.createHash("sha256").update(password).digest("hex");
-    console.log("password here ", encodedPassword);
-    const userName = req.body.userName;
-    DB.getValidUser('users', 'username', userName, 'password', encodedPassword)
+    const password = new EncryptClass_1.default(req.body.password);
+    const encodedPassword = password.getEncodedPassword();
+    const userEmail = req.body.email;
+    DB.getValidUser('users', 'email', userEmail, 'password', encodedPassword)
         .then((data) => {
         res.send({
             "status": 200,
@@ -162,7 +160,7 @@ app.get('/get-valid-user/:key', (req, res) => {
         res.send({
             "status": 500,
             "valid": false,
-            "message": `An error has occurred in validating ${userName}`
+            "message": `An error has occurred in validating ${userEmail}`
         });
         console.log('Error in get valid user ', err);
     });

@@ -5,6 +5,7 @@ import bodyParser from "body-parser";
 import crypto from "crypto";
 import { DBMethods } from "./lib/databaseClass";
 import { SQLResponse } from "./interfaces";
+import EncryptClass from "./lib/EncryptClass";
 
 dotenv.config();
 
@@ -43,10 +44,8 @@ app.post("/add-user/:key", (req: Request, res: Response): void => {
 		const DB = new DBMethods(dbHost, dbUser, dbName, dbPassword);
 		const columns = "email, username, password, loggedIn";
 
-		const password = req.body.password;
-        // const encodedPassword = password.digest("hex");
-        
-        const encodedPassword = crypto.createHash('sha256').update(password).digest('hex');
+		const password = new EncryptClass(req.body.password);
+        const encodedPassword = password.getEncodedPassword();
 
 		const values = [req.body.email, req.body.username, encodedPassword, 1];
 
@@ -78,8 +77,8 @@ app.post("/add-user/:key", (req: Request, res: Response): void => {
 app.put("/update-user/:key", (req: Request, res: Response): void => {
 	const DB = new DBMethods(dbHost, dbUser, dbName, dbPassword);
 
-	const password = crypto.createHash("sha256", req.body.password);
-	const encodedPassword = password.digest("hex");
+	const password = new EncryptClass(req.body.password);
+	const encodedPassword = password.getEncodedPassword();
 
 	DB.updatePerson("users", req.body, encodedPassword)
 		.then((data: string[]): void => {
@@ -163,13 +162,11 @@ app.put("/logout-user/:key", (req: Request, res: Response): void => {
 
 app.get('/get-valid-user/:key', (req: Request, res: Response): void => {
     const DB = new DBMethods(dbHost, dbUser, dbName, dbPassword);
-    const password = req.body.password;
-    const encodedPassword = crypto.createHash("sha256").update(password).digest("hex");
+    const password = new EncryptClass(req.body.password);
+	const encodedPassword = password.getEncodedPassword();
+    const userEmail = req.body.email;
 
-    console.log("password here ", encodedPassword);
-    const userName = req.body.userName;
-
-    DB.getValidUser('users', 'username', userName, 'password', encodedPassword)
+    DB.getValidUser('users', 'email', userEmail, 'password', encodedPassword)
         .then((data: string[]): void => {
             res.send({
                 "status": 200,
@@ -183,7 +180,7 @@ app.get('/get-valid-user/:key', (req: Request, res: Response): void => {
             res.send({
                 "status": 500,
                 "valid": false,
-                "message": `An error has occurred in validating ${userName}`
+                "message": `An error has occurred in validating ${userEmail}`
             })
             console.log('Error in get valid user ', err)
         });
