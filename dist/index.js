@@ -9,6 +9,7 @@ const cors_1 = __importDefault(require("cors"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const databaseClass_1 = require("./lib/databaseClass");
 const EncryptClass_1 = __importDefault(require("./lib/EncryptClass"));
+const RandomPassword_1 = __importDefault(require("./lib/RandomPassword"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 //Middleware functions
@@ -146,13 +147,16 @@ app.get('/get-valid-user/:key', (req, res) => {
     const password = new EncryptClass_1.default(req.body.password);
     const encodedPassword = password.getEncodedPassword();
     const userEmail = req.body.email;
+    const Random = new RandomPassword_1.default(12);
+    const randomPassword = Random.getPassword();
     DB.getValidUser('users', 'email', userEmail, 'password', encodedPassword)
         .then((data) => {
         res.send({
             "status": 200,
             "valid": true,
             "message": `Valid user`,
-            "data": data
+            "data": data,
+            "Random": randomPassword
         });
         console.log('Success in getting the user ', data);
     })

@@ -23,4 +23,5 @@ export default class Encrypt {
     getEncodedPassword(): string {
         return this.hashPassword();
     }
+
 }

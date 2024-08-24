@@ -6,6 +6,7 @@ import crypto from "crypto";
 import { DBMethods } from "./lib/databaseClass";
 import { SQLResponse } from "./interfaces";
 import EncryptClass from "./lib/EncryptClass";
+import RandomPassword from "./lib/RandomPassword";
 
 dotenv.config();
 
@@ -164,7 +165,10 @@ app.get('/get-valid-user/:key', (req: Request, res: Response): void => {
     const DB = new DBMethods(dbHost, dbUser, dbName, dbPassword);
     const password = new EncryptClass(req.body.password);
 	const encodedPassword = password.getEncodedPassword();
-    const userEmail = req.body.email;
+	const userEmail = req.body.email;
+	
+	const Random = new RandomPassword(12);
+	const randomPassword = Random.getPassword();
 
     DB.getValidUser('users', 'email', userEmail, 'password', encodedPassword)
         .then((data: string[]): void => {
@@ -172,9 +176,10 @@ app.get('/get-valid-user/:key', (req: Request, res: Response): void => {
                 "status": 200,
                 "valid": true,
                 "message": `Valid user`,
-                "data": data
+				"data": data, 
+				"Random": randomPassword
             })
-            console.log('Success in getting the user ', data)
+			console.log('Success in getting the user ', data);
         })
         .catch((err: SQLResponse): void => {
             res.send({
