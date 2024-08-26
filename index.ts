@@ -162,31 +162,51 @@ app.put("/logout-user/:key", (req: Request, res: Response): void => {
 });
 
 app.get('/get-valid-user/:key', (req: Request, res: Response): void => {
-    const DB = new DBMethods(dbHost, dbUser, dbName, dbPassword);
-    const password = new EncryptClass(req.body.password);
+	const DB = new DBMethods(dbHost, dbUser, dbName, dbPassword);
+	const password = new EncryptClass(req.body.password);
 	const encodedPassword = password.getEncodedPassword();
 	const userEmail = req.body.email;
 	
-	const Random = new RandomPassword(12);
-	const randomPassword = Random.getPassword();
 
-    DB.getValidUser('users', 'email', userEmail, 'password', encodedPassword)
-        .then((data: string[]): void => {
-            res.send({
-                "status": 200,
-                "valid": true,
-                "message": `Valid user`,
-				"data": data, 
-				"Random": randomPassword
-            })
-			console.log('Success in getting the user ', data);
-        })
-        .catch((err: SQLResponse): void => {
-            res.send({
-                "status": 500,
-                "valid": false,
-                "message": `An error has occurred in validating ${userEmail}`
-            })
-            console.log('Error in get valid user ', err)
-        });
-})
+	DB.getValidUser('users', 'email', userEmail, 'password', encodedPassword)
+		.then((data: string[]): void => {
+			res.send({
+				"status": 200,
+				"valid": true,
+				"message": `Valid user`,
+				"data": data,
+			})
+		})
+		.catch((err: SQLResponse): void => {
+			res.send({
+				"status": 500,
+				"valid": false,
+				"message": `An error has occurred in validating ${userEmail}`
+			})
+			console.log('Error in get valid user ', err)
+		});
+});
+
+app.post('/create-random-password', (req: Request, res: Response): void => {
+	const DB = new DBMethods(dbHost, dbUser, dbName, dbPassword); 
+	const password = new RandomPassword(12).getPassword();
+
+	DB.createRandomPassword('users', 'tempPassword', password, 'id', req.body.id)
+		.then((data: string[]): void => {
+			res.send({
+				"status": 200,
+				"message": `Temp password has been sent`
+			});
+
+			console.log('temp password created.')
+		})
+	
+		.catch((err: SQLResponse): void => {
+			res.send({
+				"status": 500,
+				"message": DB.getSqlError(err)
+			});
+			console.log('SQL Error ', err);
+
+		});
+});

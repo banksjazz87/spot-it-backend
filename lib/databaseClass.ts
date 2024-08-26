@@ -183,5 +183,18 @@ export class DBMethods {
             });
             this.endDb();
         });
-    }
+	}
+	
+	createRandomPassword(table: string, columnName: string, value: string, idColumn: string, id: number): Promise<string[]> {
+		return new Promise((resolve, reject) => {
+			const database = this.dbConnection;
+
+			const neededSql = `UPDATE ${table} SET ${columnName} = ${value} WHERE ${idColumn} = ${id}`;
+
+			database.query(neededSql, (err: string[], results: string[]) => {
+				err ? reject(err) : resolve(results);
+			});
+			this.endDb();
+		})
+	}
 }
