@@ -147,8 +147,6 @@ app.get('/get-valid-user/:key', (req, res) => {
     const password = new EncryptClass_1.default(req.body.password);
     const encodedPassword = password.getEncodedPassword();
     const userEmail = req.body.email;
-    const Random = new RandomPassword_1.default(12);
-    const randomPassword = Random.getPassword();
     DB.getValidUser('users', 'email', userEmail, 'password', encodedPassword)
         .then((data) => {
         res.send({
@@ -156,9 +154,7 @@ app.get('/get-valid-user/:key', (req, res) => {
             "valid": true,
             "message": `Valid user`,
             "data": data,
-            "Random": randomPassword
         });
-        console.log('Success in getting the user ', data);
     })
         .catch((err) => {
         res.send({
@@ -167,5 +163,25 @@ app.get('/get-valid-user/:key', (req, res) => {
             "message": `An error has occurred in validating ${userEmail}`
         });
         console.log('Error in get valid user ', err);
+    });
+});
+app.put('/set-random-password/:key', (req, res) => {
+    const DB = new databaseClass_1.DBMethods(dbHost, dbUser, dbName, dbPassword);
+    const password = new RandomPassword_1.default(12).getPassword();
+    const encodedPassword = new EncryptClass_1.default(password).getEncodedPassword();
+    DB.createRandomPassword('users', 'tempPassword', encodedPassword, 'id', req.body.id)
+        .then((data) => {
+        res.send({
+            "status": 200,
+            "message": `Temp password has been sent`
+        });
+        console.log('temp password created.');
+    })
+        .catch((err) => {
+        res.send({
+            "status": 500,
+            "message": DB.getSqlError(err)
+        });
+        console.log('SQL Error ', err);
     });
 });

@@ -155,5 +155,15 @@ class DBMethods {
             this.endDb();
         });
     }
+    createRandomPassword(table, columnName, value, idColumn, id) {
+        return new Promise((resolve, reject) => {
+            const database = this.dbConnection;
+            const neededSql = `UPDATE ${table} SET ${columnName} = "${value}" WHERE ${idColumn} = ${id}`;
+            database.query(neededSql, (err, results) => {
+                err ? reject(err) : resolve(results);
+            });
+            this.endDb();
+        });
+    }
 }
 exports.DBMethods = DBMethods;
