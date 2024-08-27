@@ -10,6 +10,7 @@ const body_parser_1 = __importDefault(require("body-parser"));
 const databaseClass_1 = require("./lib/databaseClass");
 const EncryptClass_1 = __importDefault(require("./lib/EncryptClass"));
 const RandomPassword_1 = __importDefault(require("./lib/RandomPassword"));
+const MailerClass_1 = __importDefault(require("./lib/MailerClass"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 //Middleware functions
@@ -126,62 +127,63 @@ app.put("/login-user/:key", (req, res) => {
 app.put("/logout-user/:key", (req, res) => {
     const DB = new databaseClass_1.DBMethods(dbHost, dbUser, dbName, dbPassword);
     const userId = req.body.id;
-    DB.logoutUser('users', userId, 'id')
+    DB.logoutUser("users", userId, "id")
         .then((data) => {
         res.send({
-            "status": 200,
-            "message": `${req.body.userName} has been logged out.`
+            status: 200,
+            message: `${req.body.userName} has been logged out.`,
         });
         console.log(`${req.body.userName} has logged out.`);
     })
         .catch((err) => {
         res.send({
-            "status": 500,
-            "message": `${req.body.userName} could not be logged out.`
+            status: 500,
+            message: `${req.body.userName} could not be logged out.`,
         });
-        console.log('Error in the logout method ', err);
+        console.log("Error in the logout method ", err);
     });
 });
-app.get('/get-valid-user/:key', (req, res) => {
+app.get("/get-valid-user/:key", (req, res) => {
     const DB = new databaseClass_1.DBMethods(dbHost, dbUser, dbName, dbPassword);
     const password = new EncryptClass_1.default(req.body.password);
     const encodedPassword = password.getEncodedPassword();
     const userEmail = req.body.email;
-    DB.getValidUser('users', 'email', userEmail, 'password', encodedPassword)
+    DB.getValidUser("users", "email", userEmail, "password", encodedPassword)
         .then((data) => {
         res.send({
-            "status": 200,
-            "valid": true,
-            "message": `Valid user`,
-            "data": data,
+            status: 200,
+            valid: true,
+            message: `Valid user`,
+            data: data,
         });
     })
         .catch((err) => {
         res.send({
-            "status": 500,
-            "valid": false,
-            "message": `An error has occurred in validating ${userEmail}`
+            status: 500,
+            valid: false,
+            message: `An error has occurred in validating ${userEmail}`,
         });
-        console.log('Error in get valid user ', err);
+        console.log("Error in get valid user ", err);
     });
 });
-app.put('/set-random-password/:key', (req, res) => {
+app.put("/set-random-password/:key", (req, res) => {
     const DB = new databaseClass_1.DBMethods(dbHost, dbUser, dbName, dbPassword);
     const password = new RandomPassword_1.default(12).getPassword();
     const encodedPassword = new EncryptClass_1.default(password).getEncodedPassword();
-    DB.createRandomPassword('users', 'tempPassword', encodedPassword, 'id', req.body.id)
+    const Email = new MailerClass_1.default(process.env.EMAIL_USER, process.env.EMAIL_PASSWORD, [req.body.email], password, req.body.username);
+    Promise.all([DB.createRandomPassword("users", "tempPassword", encodedPassword, "id", req.body.id), Email.sendMail()])
         .then((data) => {
         res.send({
-            "status": 200,
-            "message": `Temp password has been sent`
+            status: 200,
+            message: `Temp password has been sent`,
         });
-        console.log('temp password created.');
+        console.log("temp password created.");
     })
         .catch((err) => {
         res.send({
-            "status": 500,
-            "message": DB.getSqlError(err)
+            status: 500,
+            message: DB.getSqlError(err),
         });
-        console.log('SQL Error ', err);
+        console.log("SQL Error ", err);
     });
 });
