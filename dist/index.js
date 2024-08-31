@@ -143,28 +143,37 @@ app.put("/logout-user/:key", (req, res) => {
         console.log("Error in the logout method ", err);
     });
 });
-app.get("/get-valid-user/:key", (req, res) => {
-    const DB = new databaseClass_1.DBMethods(dbHost, dbUser, dbName, dbPassword);
-    const password = new EncryptClass_1.default(req.body.password);
-    const encodedPassword = password.getEncodedPassword();
-    const userEmail = req.body.email;
-    DB.getValidUser("users", "email", userEmail, "password", encodedPassword)
-        .then((data) => {
-        res.send({
-            status: 200,
-            valid: true,
-            message: `Valid user`,
-            data: data,
+app.get("/get-valid-user/:key/:email/:password", (req, res) => {
+    if (req.params.key === ApiKey) {
+        const DB = new databaseClass_1.DBMethods(dbHost, dbUser, dbName, dbPassword);
+        const password = new EncryptClass_1.default(req.params.password);
+        const encodedPassword = password.getEncodedPassword();
+        const userEmail = req.params.email;
+        DB.getValidUser("users", "email", userEmail, "password", encodedPassword)
+            .then((data) => {
+            res.send({
+                status: 200,
+                valid: true,
+                message: `Valid user`,
+                data: data,
+            });
+        })
+            .catch((err) => {
+            res.send({
+                status: 500,
+                valid: false,
+                message: `An error has occurred in validating ${userEmail}`,
+            });
+            console.log("Error in get valid user ", err);
         });
-    })
-        .catch((err) => {
+    }
+    else {
         res.send({
-            status: 500,
+            status: 404,
             valid: false,
-            message: `An error has occurred in validating ${userEmail}`,
+            message: 'Please provide a valid API key'
         });
-        console.log("Error in get valid user ", err);
-    });
+    }
 });
 app.put("/set-random-password/:key", (req, res) => {
     const DB = new databaseClass_1.DBMethods(dbHost, dbUser, dbName, dbPassword);

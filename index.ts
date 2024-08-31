@@ -26,6 +26,12 @@ const dbUser = process.env.MYSQL_USER;
 const dbName = process.env.MYSQL_DB;
 const dbPassword = process.env.MYSQL_PASSWORD;
 
+const invalidKeyResponse = {
+	status: 404,
+	valid: false,
+	message: "Please provide a valid API key",
+};
+
 app.listen(port, (): void => {
 	console.log(`Server is running on port ${port}`);
 });
@@ -69,147 +75,167 @@ app.post("/add-user/:key", (req: Request, res: Response): void => {
 				console.log("An error has occurred while trying to add the user.");
 			});
 	} else {
-		res.send({
-			status: 401,
-			message: "Please try again with a valid API key.",
-		});
+		res.send(invalidKeyResponse);
 	}
 });
 
 app.put("/update-user/:key", (req: Request, res: Response): void => {
-	const DB = new DBMethods(dbHost, dbUser, dbName, dbPassword);
+	if (req.params.key === ApiKey) {
+		const DB = new DBMethods(dbHost, dbUser, dbName, dbPassword);
 
-	const password = new EncryptClass(req.body.password);
-	const encodedPassword = password.getEncodedPassword();
+		const password = new EncryptClass(req.body.password);
+		const encodedPassword = password.getEncodedPassword();
 
-	DB.updatePerson("users", req.body, encodedPassword)
-		.then((data: string[]): void => {
-			res.send({
-				status: 200,
-				message: `${req.body.username} has been updated.`,
+		DB.updatePerson("users", req.body, encodedPassword)
+			.then((data: string[]): void => {
+				res.send({
+					status: 200,
+					message: `${req.body.username} has been updated.`,
+				});
+				console.log("Successfully updated the user.");
+			})
+
+			.catch((err: SQLResponse): void => {
+				res.send({
+					status: 500,
+					message: DB.getSqlError(err),
+				});
+				console.log("ERROR ", err);
 			});
-			console.log("Successfully updated the user.");
-		})
-
-		.catch((err: SQLResponse): void => {
-			res.send({
-				status: 500,
-				message: DB.getSqlError(err),
-			});
-			console.log("ERROR ", err);
-		});
+	} else {
+		res.send(invalidKeyResponse);
+	}
 });
 
 app.delete("/delete-user/:key", (req: Request, res: Response): void => {
-	const DB = new DBMethods(dbHost, dbUser, dbName, dbPassword);
+	if (req.params.key === ApiKey) {
+		const DB = new DBMethods(dbHost, dbUser, dbName, dbPassword);
 
-	DB.deletePerson("users", req.body.id)
-		.then((data: string[]): void => {
-			res.send({
-				status: 200,
-				message: "1 user has been deleted",
+		DB.deletePerson("users", req.body.id)
+			.then((data: string[]): void => {
+				res.send({
+					status: 200,
+					message: "1 user has been deleted",
+				});
+				console.log("Success", data);
+			})
+			.catch((err: SQLResponse): void => {
+				res.send({
+					status: 500,
+					message: DB.getSqlError(err),
+				});
+				console.log("Error in deleting a user ", err);
 			});
-			console.log("Success", data);
-		})
-		.catch((err: SQLResponse): void => {
-			res.send({
-				status: 500,
-				message: DB.getSqlError(err),
-			});
-			console.log("Error in deleting a user ", err);
-		});
+	} else {
+		res.send(invalidKeyResponse);
+	}
 });
 
 app.put("/login-user/:key", (req: Request, res: Response): void => {
-	const DB = new DBMethods(dbHost, dbUser, dbName, dbPassword);
-	const userId = req.body.id;
+	if (req.params.key === ApiKey) {
+		const DB = new DBMethods(dbHost, dbUser, dbName, dbPassword);
+		const userId = req.body.id;
 
-	DB.loginUser("users", "id", userId)
-		.then((data: string[]): void => {
-			res.send({
-				status: 200,
-				message: `${req.body.userName} has been logged in.`,
+		DB.loginUser("users", "id", userId)
+			.then((data: string[]): void => {
+				res.send({
+					status: 200,
+					message: `${req.body.userName} has been logged in.`,
+				});
+				console.log("Success! ", `${req.body.userName} has been logged in`);
+			})
+			.catch((err: SQLResponse): void => {
+				res.send({
+					status: 500,
+					message: DB.getSqlError(err),
+				});
+				console.log("Error ", `${req.body.userName} could not be logged in.`);
 			});
-			console.log("Success! ", `${req.body.userName} has been logged in`);
-		})
-		.catch((err: SQLResponse): void => {
-			res.send({
-				status: 500,
-				message: DB.getSqlError(err),
-			});
-			console.log("Error ", `${req.body.userName} could not be logged in.`);
-		});
+	} else {
+		res.send(invalidKeyResponse);
+	}
 });
 
 app.put("/logout-user/:key", (req: Request, res: Response): void => {
-	const DB = new DBMethods(dbHost, dbUser, dbName, dbPassword);
-	const userId = req.body.id;
+	if (req.params.key === ApiKey) {
+		const DB = new DBMethods(dbHost, dbUser, dbName, dbPassword);
+		const userId = req.body.id;
 
-	DB.logoutUser("users", userId, "id")
-		.then((data: string[]): void => {
-			res.send({
-				status: 200,
-				message: `${req.body.userName} has been logged out.`,
+		DB.logoutUser("users", userId, "id")
+			.then((data: string[]): void => {
+				res.send({
+					status: 200,
+					message: `${req.body.userName} has been logged out.`,
+				});
+				console.log(`${req.body.userName} has logged out.`);
+			})
+			.catch((err: SQLResponse): void => {
+				res.send({
+					status: 500,
+					message: `${req.body.userName} could not be logged out.`,
+				});
+				console.log("Error in the logout method ", err);
 			});
-			console.log(`${req.body.userName} has logged out.`);
-		})
-		.catch((err: SQLResponse): void => {
-			res.send({
-				status: 500,
-				message: `${req.body.userName} could not be logged out.`,
-			});
-			console.log("Error in the logout method ", err);
-		});
+	} else {
+		res.send(invalidKeyResponse);
+	}
 });
 
-app.get("/get-valid-user/:key", (req: Request, res: Response): void => {
-	const DB = new DBMethods(dbHost, dbUser, dbName, dbPassword);
-	const password = new EncryptClass(req.body.password);
-	const encodedPassword = password.getEncodedPassword();
-	const userEmail = req.body.email;
+app.get("/get-valid-user/:key/:email/:password", (req: Request, res: Response): void => {
+	if (req.params.key === ApiKey) {
+		const DB = new DBMethods(dbHost, dbUser, dbName, dbPassword);
+		const password = new EncryptClass(req.params.password);
+		const encodedPassword = password.getEncodedPassword();
+		const userEmail = req.params.email;
 
-	DB.getValidUser("users", "email", userEmail, "password", encodedPassword)
-		.then((data: string[]): void => {
-			res.send({
-				status: 200,
-				valid: true,
-				message: `Valid user`,
-				data: data,
+		DB.getValidUser("users", "email", userEmail, "password", encodedPassword)
+			.then((data: string[]): void => {
+				res.send({
+					status: 200,
+					valid: true,
+					message: `Valid user`,
+					data: data,
+				});
+			})
+			.catch((err: SQLResponse): void => {
+				res.send({
+					status: 500,
+					valid: false,
+					message: `An error has occurred in validating ${userEmail}`,
+				});
+				console.log("Error in get valid user ", err);
 			});
-		})
-		.catch((err: SQLResponse): void => {
-			res.send({
-				status: 500,
-				valid: false,
-				message: `An error has occurred in validating ${userEmail}`,
-			});
-			console.log("Error in get valid user ", err);
-		});
+	} else {
+		res.send(invalidKeyResponse);
+	}
 });
 
 app.put("/set-random-password/:key", (req: Request, res: Response): void => {
-	const DB = new DBMethods(dbHost, dbUser, dbName, dbPassword);
-	const password = new RandomPassword(12).getPassword();
-	const encodedPassword = new EncryptClass(password).getEncodedPassword();
+	if (req.params.key === ApiKey) {
+		const DB = new DBMethods(dbHost, dbUser, dbName, dbPassword);
+		const password = new RandomPassword(12).getPassword();
+		const encodedPassword = new EncryptClass(password).getEncodedPassword();
 
-	const Email = new MailerClass(process.env.EMAIL_USER, process.env.EMAIL_PASSWORD, [req.body.email], password, req.body.username);
+		const Email = new MailerClass(process.env.EMAIL_USER, process.env.EMAIL_PASSWORD, [req.body.email], password, req.body.username);
 
+		Promise.all([DB.createRandomPassword("users", "tempPassword", encodedPassword, "id", req.body.id), Email.sendMail()])
+			.then((data: [string[], void]): void => {
+				res.send({
+					status: 200,
+					message: `Temp password has been sent`,
+				});
 
-	Promise.all([DB.createRandomPassword("users", "tempPassword", encodedPassword, "id", req.body.id), Email.sendMail()])
-		.then((data: [string[], void]): void => {
-			res.send({
-				status: 200,
-				message: `Temp password has been sent`,
+				console.log("temp password created.");
+			})
+
+			.catch((err: SQLResponse | any): void => {
+				res.send({
+					status: 500,
+					message: DB.getSqlError(err),
+				});
+				console.log("SQL Error ", err);
 			});
-
-			console.log("temp password created.");
-		})
-
-		.catch((err: SQLResponse | any): void => {
-			res.send({
-				status: 500,
-				message: DB.getSqlError(err),
-			});
-			console.log("SQL Error ", err);
-		});
+	} else {
+		res.send(invalidKeyResponse);
+	}
 });
