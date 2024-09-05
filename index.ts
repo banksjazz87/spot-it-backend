@@ -192,7 +192,6 @@ app.get("/get-valid-user/:key/:email/:password", (req: Request, res: Response): 
 			.then((data: string[]): void => {
 				res.send({
 					status: 200,
-					valid: true,
 					message: `Valid user`,
 					data: data,
 				});
@@ -200,7 +199,6 @@ app.get("/get-valid-user/:key/:email/:password", (req: Request, res: Response): 
 			.catch((err: SQLResponse): void => {
 				res.send({
 					status: 500,
-					valid: false,
 					message: `An error has occurred in validating ${userEmail}`,
 				});
 				console.log("Error in get valid user ", err);

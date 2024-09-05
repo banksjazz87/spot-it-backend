@@ -23,6 +23,11 @@ const dbHost = process.env.MYSQL_HOST;
 const dbUser = process.env.MYSQL_USER;
 const dbName = process.env.MYSQL_DB;
 const dbPassword = process.env.MYSQL_PASSWORD;
+const invalidKeyResponse = {
+    status: 404,
+    valid: false,
+    message: "Please provide a valid API key",
+};
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
@@ -61,87 +66,104 @@ app.post("/add-user/:key", (req, res) => {
         });
     }
     else {
-        res.send({
-            status: 401,
-            message: "Please try again with a valid API key.",
-        });
+        res.send(invalidKeyResponse);
     }
 });
 app.put("/update-user/:key", (req, res) => {
-    const DB = new databaseClass_1.DBMethods(dbHost, dbUser, dbName, dbPassword);
-    const password = new EncryptClass_1.default(req.body.password);
-    const encodedPassword = password.getEncodedPassword();
-    DB.updatePerson("users", req.body, encodedPassword)
-        .then((data) => {
-        res.send({
-            status: 200,
-            message: `${req.body.username} has been updated.`,
+    if (req.params.key === ApiKey) {
+        const DB = new databaseClass_1.DBMethods(dbHost, dbUser, dbName, dbPassword);
+        const password = new EncryptClass_1.default(req.body.password);
+        const encodedPassword = password.getEncodedPassword();
+        DB.updatePerson("users", req.body, encodedPassword)
+            .then((data) => {
+            res.send({
+                status: 200,
+                message: `${req.body.username} has been updated.`,
+            });
+            console.log("Successfully updated the user.");
+        })
+            .catch((err) => {
+            res.send({
+                status: 500,
+                message: DB.getSqlError(err),
+            });
+            console.log("ERROR ", err);
         });
-        console.log("Successfully updated the user.");
-    })
-        .catch((err) => {
-        res.send({
-            status: 500,
-            message: DB.getSqlError(err),
-        });
-        console.log("ERROR ", err);
-    });
+    }
+    else {
+        res.send(invalidKeyResponse);
+    }
 });
 app.delete("/delete-user/:key", (req, res) => {
-    const DB = new databaseClass_1.DBMethods(dbHost, dbUser, dbName, dbPassword);
-    DB.deletePerson("users", req.body.id)
-        .then((data) => {
-        res.send({
-            status: 200,
-            message: "1 user has been deleted",
+    if (req.params.key === ApiKey) {
+        const DB = new databaseClass_1.DBMethods(dbHost, dbUser, dbName, dbPassword);
+        DB.deletePerson("users", req.body.id)
+            .then((data) => {
+            res.send({
+                status: 200,
+                message: "1 user has been deleted",
+            });
+            console.log("Success", data);
+        })
+            .catch((err) => {
+            res.send({
+                status: 500,
+                message: DB.getSqlError(err),
+            });
+            console.log("Error in deleting a user ", err);
         });
-        console.log("Success", data);
-    })
-        .catch((err) => {
-        res.send({
-            status: 500,
-            message: DB.getSqlError(err),
-        });
-        console.log("Error in deleting a user ", err);
-    });
+    }
+    else {
+        res.send(invalidKeyResponse);
+    }
 });
 app.put("/login-user/:key", (req, res) => {
-    const DB = new databaseClass_1.DBMethods(dbHost, dbUser, dbName, dbPassword);
-    const userId = req.body.id;
-    DB.loginUser("users", "id", userId)
-        .then((data) => {
-        res.send({
-            status: 200,
-            message: `${req.body.userName} has been logged in.`,
+    if (req.params.key === ApiKey) {
+        const DB = new databaseClass_1.DBMethods(dbHost, dbUser, dbName, dbPassword);
+        const userId = req.body.id;
+        DB.loginUser("users", "id", userId)
+            .then((data) => {
+            res.send({
+                status: 200,
+                message: `${req.body.userName} has been logged in.`,
+            });
+            console.log("Success! ", `${req.body.userName} has been logged in`);
+        })
+            .catch((err) => {
+            res.send({
+                status: 500,
+                message: DB.getSqlError(err),
+            });
+            console.log("Error ", `${req.body.userName} could not be logged in.`);
         });
-        console.log("Success! ", `${req.body.userName} has been logged in`);
-    })
-        .catch((err) => {
-        res.send({
-            status: 500,
-            message: DB.getSqlError(err),
-        });
-        console.log("Error ", `${req.body.userName} could not be logged in.`);
-    });
+    }
+    else {
+        res.send(invalidKeyResponse);
+    }
 });
 app.put("/logout-user/:key", (req, res) => {
-    const DB = new databaseClass_1.DBMethods(dbHost, dbUser, dbName, dbPassword);
-    const userId = req.body.id;
-    DB.logoutUser("users", userId, "id")
-        .then((data) => {
-        res.send({
-            status: 200,
-            message: `${req.body.userName} has been logged out.`,
+    if (req.params.key === ApiKey) {
+        const DB = new databaseClass_1.DBMethods(dbHost, dbUser, dbName, dbPassword);
+        const userId = req.body.id;
+        DB.logoutUser("users", userId, "id")
+            .then((data) => {
+            res.send({
+                status: 200,
+                message: `${req.body.userName} has been logged out.`,
+            });
+            console.log(`${req.body.userName} has logged out.`);
+        })
+            .catch((err) => {
+            res.send({
+                status: 500,
+                message: `${req.body.userName} could not be logged out.`,
+            });
+            console.log("Error in the logout method ", err);
         });
-        console.log(`${req.body.userName} has logged out.`);
-    })
-        .catch((err) => {
-        res.send({
-            status: 500,
-            message: `${req.body.userName} could not be logged out.`,
-        });
-        console.log("Error in the logout method ", err);
-    });
+    }
+    else {
+        res.send(invalidKeyResponse);
+    }
 });
 app.get("/get-valid-user/:key/:email/:password", (req, res) => {
     if (req.params.key === ApiKey) {
@@ -168,31 +190,32 @@ app.get("/get-valid-user/:key/:email/:password", (req, res) => {
         });
     }
     else {
-        res.send({
-            status: 404,
-            valid: false,
-            message: 'Please provide a valid API key'
-        });
+        res.send(invalidKeyResponse);
     }
 });
 app.put("/set-random-password/:key", (req, res) => {
-    const DB = new databaseClass_1.DBMethods(dbHost, dbUser, dbName, dbPassword);
-    const password = new RandomPassword_1.default(12).getPassword();
-    const encodedPassword = new EncryptClass_1.default(password).getEncodedPassword();
-    const Email = new MailerClass_1.default(process.env.EMAIL_USER, process.env.EMAIL_PASSWORD, [req.body.email], password, req.body.username);
-    Promise.all([DB.createRandomPassword("users", "tempPassword", encodedPassword, "id", req.body.id), Email.sendMail()])
-        .then((data) => {
-        res.send({
-            status: 200,
-            message: `Temp password has been sent`,
+    if (req.params.key === ApiKey) {
+        const DB = new databaseClass_1.DBMethods(dbHost, dbUser, dbName, dbPassword);
+        const password = new RandomPassword_1.default(12).getPassword();
+        const encodedPassword = new EncryptClass_1.default(password).getEncodedPassword();
+        const Email = new MailerClass_1.default(process.env.EMAIL_USER, process.env.EMAIL_PASSWORD, [req.body.email], password, req.body.username);
+        Promise.all([DB.createRandomPassword("users", "tempPassword", encodedPassword, "id", req.body.id), Email.sendMail()])
+            .then((data) => {
+            res.send({
+                status: 200,
+                message: `Temp password has been sent`,
+            });
+            console.log("temp password created.");
+        })
+            .catch((err) => {
+            res.send({
+                status: 500,
+                message: DB.getSqlError(err),
+            });
+            console.log("SQL Error ", err);
         });
-        console.log("temp password created.");
-    })
-        .catch((err) => {
-        res.send({
-            status: 500,
-            message: DB.getSqlError(err),
-        });
-        console.log("SQL Error ", err);
-    });
+    }
+    else {
+        res.send(invalidKeyResponse);
+    }
 });
