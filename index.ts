@@ -259,4 +259,5 @@ app.get('/get-user-by-email/:key', (req: Request, res: Response): void => {
 			});
 			console.log("SQL Error ", err);
 		});
-})
+});
+
