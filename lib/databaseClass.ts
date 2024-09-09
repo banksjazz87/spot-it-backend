@@ -197,4 +197,18 @@ export class DBMethods {
 			this.endDb();
 		})
 	}
+
+
+	getUser(table: string, columnName: string, value: string): Promise<string[]> {
+		return new Promise((resolve, reject) => {
+			const database = this.dbConnection;
+
+			const neededSql = `SELECT * FROM ${table} WHERE ${columnName} = ${value}`;
+
+			database.query(neededSql, (err: string[], results: string[]) => {
+				err ? reject(err) : resolve(results);
+			});
+			this.endDb();
+		});
+	}
 }

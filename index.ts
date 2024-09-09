@@ -140,16 +140,16 @@ app.put("/login-user/:key", (req: Request, res: Response): void => {
 			.then((data: string[]): void => {
 				res.send({
 					status: 200,
-					message: `${req.body.userName} has been logged in.`,
+					message: `${req.body.username} has been logged in.`,
 				});
-				console.log("Success! ", `${req.body.userName} has been logged in`);
+				console.log("Success! ", `${req.body.username} has been logged in`);
 			})
 			.catch((err: SQLResponse): void => {
 				res.send({
 					status: 500,
 					message: DB.getSqlError(err),
 				});
-				console.log("Error ", `${req.body.userName} could not be logged in.`);
+				console.log("Error ", `${req.body.username} could not be logged in.`);
 			});
 	} else {
 		res.send(invalidKeyResponse);
@@ -165,14 +165,14 @@ app.put("/logout-user/:key", (req: Request, res: Response): void => {
 			.then((data: string[]): void => {
 				res.send({
 					status: 200,
-					message: `${req.body.userName} has been logged out.`,
+					message: `${req.body.username} has been logged out.`,
 				});
-				console.log(`${req.body.userName} has logged out.`);
+				console.log(`${req.body.username} has logged out.`);
 			})
 			.catch((err: SQLResponse): void => {
 				res.send({
 					status: 500,
-					message: `${req.body.userName} could not be logged out.`,
+					message: `${req.body.username} could not be logged out.`,
 				});
 				console.log("Error in the logout method ", err);
 			});
@@ -237,3 +237,26 @@ app.put("/set-random-password/:key", (req: Request, res: Response): void => {
 		res.send(invalidKeyResponse);
 	}
 });
+
+
+app.get('/get-user-by-email/:key', (req: Request, res: Response): void => {
+	const DB = new DBMethods(dbHost, dbUser, dbName, dbPassword);
+	const email = req.params.email;
+
+	DB.getUser('users', 'email', email)
+		.then((data: string[]): void => {
+			res.send({
+				status: 200,
+				message: 'User Retrieved',
+				data: data
+			});
+			console.log('The user\'s data has been retrieved ', data);
+		})
+		.catch((err: SQLResponse): void => {
+			res.send({
+				status: 500,
+				message: DB.getSqlError(err),
+			});
+			console.log("SQL Error ", err);
+		});
+})

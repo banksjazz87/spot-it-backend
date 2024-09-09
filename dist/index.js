@@ -125,16 +125,16 @@ app.put("/login-user/:key", (req, res) => {
             .then((data) => {
             res.send({
                 status: 200,
-                message: `${req.body.userName} has been logged in.`,
+                message: `${req.body.username} has been logged in.`,
             });
-            console.log("Success! ", `${req.body.userName} has been logged in`);
+            console.log("Success! ", `${req.body.username} has been logged in`);
         })
             .catch((err) => {
             res.send({
                 status: 500,
                 message: DB.getSqlError(err),
             });
-            console.log("Error ", `${req.body.userName} could not be logged in.`);
+            console.log("Error ", `${req.body.username} could not be logged in.`);
         });
     }
     else {
@@ -149,14 +149,14 @@ app.put("/logout-user/:key", (req, res) => {
             .then((data) => {
             res.send({
                 status: 200,
-                message: `${req.body.userName} has been logged out.`,
+                message: `${req.body.username} has been logged out.`,
             });
-            console.log(`${req.body.userName} has logged out.`);
+            console.log(`${req.body.username} has logged out.`);
         })
             .catch((err) => {
             res.send({
                 status: 500,
-                message: `${req.body.userName} could not be logged out.`,
+                message: `${req.body.username} could not be logged out.`,
             });
             console.log("Error in the logout method ", err);
         });
@@ -175,7 +175,6 @@ app.get("/get-valid-user/:key/:email/:password", (req, res) => {
             .then((data) => {
             res.send({
                 status: 200,
-                valid: true,
                 message: `Valid user`,
                 data: data,
             });
@@ -183,7 +182,6 @@ app.get("/get-valid-user/:key/:email/:password", (req, res) => {
             .catch((err) => {
             res.send({
                 status: 500,
-                valid: false,
                 message: `An error has occurred in validating ${userEmail}`,
             });
             console.log("Error in get valid user ", err);
