@@ -53,6 +53,7 @@ app.post("/add-user/:key", (req, res) => {
             res.send({
                 status: 200,
                 message: `${req.body.username} has been addded.`,
+                data: data
             });
             console.log(req.body);
             console.log("User has been added");
@@ -79,6 +80,7 @@ app.put("/update-user/:key", (req, res) => {
             res.send({
                 status: 200,
                 message: `${req.body.username} has been updated.`,
+                data: data
             });
             console.log("Successfully updated the user.");
         })
@@ -102,6 +104,7 @@ app.delete("/delete-user/:key", (req, res) => {
             res.send({
                 status: 200,
                 message: "1 user has been deleted",
+                data: data
             });
             console.log("Success", data);
         })
@@ -126,6 +129,7 @@ app.put("/login-user/:key", (req, res) => {
             res.send({
                 status: 200,
                 message: `${req.body.username} has been logged in.`,
+                data: data
             });
             console.log("Success! ", `${req.body.username} has been logged in`);
         })
@@ -150,6 +154,7 @@ app.put("/logout-user/:key", (req, res) => {
             res.send({
                 status: 200,
                 message: `${req.body.username} has been logged out.`,
+                data: data
             });
             console.log(`${req.body.username} has logged out.`);
         })
@@ -202,6 +207,7 @@ app.put("/set-random-password/:key", (req, res) => {
             res.send({
                 status: 200,
                 message: `Temp password has been sent`,
+                data: data
             });
             console.log("temp password created.");
         })
@@ -216,4 +222,24 @@ app.put("/set-random-password/:key", (req, res) => {
     else {
         res.send(invalidKeyResponse);
     }
+});
+app.get('/get-user-by-email/:key/:email', (req, res) => {
+    const DB = new databaseClass_1.DBMethods(dbHost, dbUser, dbName, dbPassword);
+    const email = req.params.email;
+    DB.getUser('users', 'email', email)
+        .then((data) => {
+        res.send({
+            status: 200,
+            message: 'User Retrieved',
+            data: data
+        });
+        console.log('The user\'s data has been retrieved ', data);
+    })
+        .catch((err) => {
+        res.send({
+            status: 500,
+            message: DB.getSqlError(err),
+        });
+        console.log("SQL Error ", err);
+    });
 });

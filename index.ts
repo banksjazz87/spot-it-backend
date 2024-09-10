@@ -62,6 +62,7 @@ app.post("/add-user/:key", (req: Request, res: Response): void => {
 				res.send({
 					status: 200,
 					message: `${req.body.username} has been addded.`,
+					data: data
 				});
 
 				console.log(req.body);
@@ -91,6 +92,7 @@ app.put("/update-user/:key", (req: Request, res: Response): void => {
 				res.send({
 					status: 200,
 					message: `${req.body.username} has been updated.`,
+					data: data
 				});
 				console.log("Successfully updated the user.");
 			})
@@ -116,6 +118,7 @@ app.delete("/delete-user/:key", (req: Request, res: Response): void => {
 				res.send({
 					status: 200,
 					message: "1 user has been deleted",
+					data: data
 				});
 				console.log("Success", data);
 			})
@@ -141,6 +144,7 @@ app.put("/login-user/:key", (req: Request, res: Response): void => {
 				res.send({
 					status: 200,
 					message: `${req.body.username} has been logged in.`,
+					data: data
 				});
 				console.log("Success! ", `${req.body.username} has been logged in`);
 			})
@@ -166,6 +170,7 @@ app.put("/logout-user/:key", (req: Request, res: Response): void => {
 				res.send({
 					status: 200,
 					message: `${req.body.username} has been logged out.`,
+					data: data
 				});
 				console.log(`${req.body.username} has logged out.`);
 			})
@@ -221,6 +226,7 @@ app.put("/set-random-password/:key", (req: Request, res: Response): void => {
 				res.send({
 					status: 200,
 					message: `Temp password has been sent`,
+					data: data
 				});
 
 				console.log("temp password created.");
@@ -239,7 +245,7 @@ app.put("/set-random-password/:key", (req: Request, res: Response): void => {
 });
 
 
-app.get('/get-user-by-email/:key', (req: Request, res: Response): void => {
+app.get('/get-user-by-email/:key/:email', (req: Request, res: Response): void => {
 	const DB = new DBMethods(dbHost, dbUser, dbName, dbPassword);
 	const email = req.params.email;
 

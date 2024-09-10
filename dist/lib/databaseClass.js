@@ -165,5 +165,15 @@ class DBMethods {
             this.endDb();
         });
     }
+    getUser(table, columnName, value) {
+        return new Promise((resolve, reject) => {
+            const database = this.dbConnection;
+            const neededSql = `SELECT * FROM ${table} WHERE ${columnName} = "${value}";`;
+            database.query(neededSql, (err, results) => {
+                err ? reject(err) : resolve(results);
+            });
+            this.endDb();
+        });
+    }
 }
 exports.DBMethods = DBMethods;

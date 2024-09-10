@@ -203,7 +203,7 @@ export class DBMethods {
 		return new Promise((resolve, reject) => {
 			const database = this.dbConnection;
 
-			const neededSql = `SELECT * FROM ${table} WHERE ${columnName} = ${value}`;
+			const neededSql = `SELECT * FROM ${table} WHERE ${columnName} = "${value}";`;
 
 			database.query(neededSql, (err: string[], results: string[]) => {
 				err ? reject(err) : resolve(results);
