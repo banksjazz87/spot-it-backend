@@ -246,24 +246,56 @@ app.put("/set-random-password/:key", (req: Request, res: Response): void => {
 
 
 app.get('/get-user-by-email/:key/:email', (req: Request, res: Response): void => {
-	const DB = new DBMethods(dbHost, dbUser, dbName, dbPassword);
-	const email = req.params.email;
+	
+	if (req.params.key === ApiKey) {
+		const DB = new DBMethods(dbHost, dbUser, dbName, dbPassword);
+		const email = req.params.email;
 
-	DB.getUser('users', 'email', email)
-		.then((data: string[]): void => {
-			res.send({
-				status: 200,
-				message: 'User Retrieved',
-				data: data
+		DB.getUser('users', 'email', email)
+			.then((data: string[]): void => {
+				res.send({
+					status: 200,
+					message: 'User Retrieved',
+					data: data
+				});
+				console.log('The user\'s data has been retrieved ', data);
+			})
+			.catch((err: SQLResponse): void => {
+				res.send({
+					status: 500,
+					message: DB.getSqlError(err),
+				});
+				console.log("SQL Error ", err);
 			});
-			console.log('The user\'s data has been retrieved ', data);
-		})
-		.catch((err: SQLResponse): void => {
-			res.send({
-				status: 500,
-				message: DB.getSqlError(err),
-			});
-			console.log("SQL Error ", err);
-		});
+	} else {
+		res.send(invalidKeyResponse);
+	}
 });
+
+
+app.get('/username/:key/:username', (req: Request, res: Response): void => {
+	if (req.params.key === ApiKey) {
+		const DB = new DBMethods(dbHost, dbUser, dbName, dbPassword);
+		const username = req.params.username;
+
+		DB.getUser('users', 'username', username)
+			.then((data: string[]): void => {
+				res.send({
+					status: 200,
+					message: 'User retrieved',
+					data: data
+				});
+				console.log(`${username} was found in the database `, data);
+			})
+			.catch((error: SQLResponse): void => {
+				res.send({
+					status: 500,
+					message: DB.getSqlError(error)
+				});
+				console.log(`There has been an error with this request `, DB.getSqlError(error));
+			});
+	} else {
+		res.send(invalidKeyResponse);
+	}
+})
 

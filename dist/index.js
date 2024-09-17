@@ -224,22 +224,52 @@ app.put("/set-random-password/:key", (req, res) => {
     }
 });
 app.get('/get-user-by-email/:key/:email', (req, res) => {
-    const DB = new databaseClass_1.DBMethods(dbHost, dbUser, dbName, dbPassword);
-    const email = req.params.email;
-    DB.getUser('users', 'email', email)
-        .then((data) => {
-        res.send({
-            status: 200,
-            message: 'User Retrieved',
-            data: data
+    if (req.params.key === ApiKey) {
+        const DB = new databaseClass_1.DBMethods(dbHost, dbUser, dbName, dbPassword);
+        const email = req.params.email;
+        DB.getUser('users', 'email', email)
+            .then((data) => {
+            res.send({
+                status: 200,
+                message: 'User Retrieved',
+                data: data
+            });
+            console.log('The user\'s data has been retrieved ', data);
+        })
+            .catch((err) => {
+            res.send({
+                status: 500,
+                message: DB.getSqlError(err),
+            });
+            console.log("SQL Error ", err);
         });
-        console.log('The user\'s data has been retrieved ', data);
-    })
-        .catch((err) => {
-        res.send({
-            status: 500,
-            message: DB.getSqlError(err),
+    }
+    else {
+        res.send(invalidKeyResponse);
+    }
+});
+app.get('/username/:key/:username', (req, res) => {
+    if (req.params.key === ApiKey) {
+        const DB = new databaseClass_1.DBMethods(dbHost, dbUser, dbName, dbPassword);
+        const username = req.params.username;
+        DB.getUser('users', 'username', username)
+            .then((data) => {
+            res.send({
+                status: 200,
+                message: 'User retrieved',
+                data: data
+            });
+            console.log(`${username} was found in the database `, data);
+        })
+            .catch((error) => {
+            res.send({
+                status: 500,
+                message: DB.getSqlError(error)
+            });
+            console.log(`There has been an error with this request `, DB.getSqlError(error));
         });
-        console.log("SQL Error ", err);
-    });
+    }
+    else {
+        res.send(invalidKeyResponse);
+    }
 });
