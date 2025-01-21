@@ -213,6 +213,32 @@ app.get("/get-valid-user/:key/:email/:password", (req: Request, res: Response): 
 	}
 });
 
+app.get('/get-user-with-temp-password/:key/:email/:tempPassword', (req: Request, res: Response): void => {
+	if (req.params.key === ApiKey) {
+		const DB = new DBMethods(dbHost, dbUser, dbName, dbPassword);
+		const password = new EncryptClass(req.params.password);
+		const encodedPassword = password.getEncodedPassword();
+		const userEmail = req.params.email;
+
+		DB.getValidUser("users", "email", userEmail, "tempPassword", encodedPassword).then((data: string[]): void => {
+			res.send({
+				status: 200,
+				message: `The user with email: ${userEmail} is a valid user.`,
+				data: data[0]
+			});
+			console.log(data);
+		}).catch((err: SQLResponse): void => {
+			res.send({
+				status: 500,
+				message: `The following error occurred in validating the user with the email ${userEmail}: ${DB.getSqlError(err)}`
+			});
+			console.log('Error in getting valid user with temp password ', err);
+		})
+	} else {
+		res.send(invalidKeyResponse);
+	}
+});
+
 app.put("/set-random-password/:key", (req: Request, res: Response): void => {
 	if (req.params.key === ApiKey) {
 		const DB = new DBMethods(dbHost, dbUser, dbName, dbPassword);
@@ -297,5 +323,7 @@ app.get('/username/:key/:username', (req: Request, res: Response): void => {
 	} else {
 		res.send(invalidKeyResponse);
 	}
-})
+});
+
+
 
