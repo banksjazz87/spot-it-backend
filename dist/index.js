@@ -28,22 +28,6 @@ const invalidKeyResponse = {
     valid: false,
     message: "Please provide a valid API key",
 };
-const DBResultsFoundResponse = (dataArray, res) => {
-    if (dataArray[0]) {
-        res.send({
-            status: 200,
-            message: 'Results found.',
-            data: dataArray
-        });
-    }
-    else {
-        res.send({
-            status: 400,
-            message: 'No results found',
-            data: dataArray
-        });
-    }
-};
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
@@ -194,19 +178,19 @@ app.get("/get-valid-user/:key/:email/:password", (req, res) => {
         const userEmail = req.params.email;
         DB.getValidUser("users", "email", userEmail, "password", encodedPassword)
             .then((data) => {
-            // if (data[0]) {
-            // 	res.send({
-            // 		status: 200,
-            // 		message: `Valid user`,
-            // 		data: data[0],
-            // 	});
-            // } else {
-            // 	res.send({
-            // 		status: 400,
-            // 		message: `Invalid user passed`,
-            // 	});
-            // }
-            DBResultsFoundResponse(data, res);
+            if (data[0]) {
+                res.send({
+                    status: 200,
+                    message: `Valid user`,
+                    data: data[0],
+                });
+            }
+            else {
+                res.send({
+                    status: 400,
+                    message: `Invalid user passed`,
+                });
+            }
         })
             .catch((err) => {
             res.send({
@@ -228,19 +212,19 @@ app.get('/get-user-with-temp-password/:key/:email/:tempPassword', (req, res) => 
         const userEmail = req.params.email;
         console.log('Temp here ', req.params.tempPassword);
         DB.getValidUser("users", "email", userEmail, "tempPassword", encodedPassword).then((data) => {
-            // if (data[0]) {
-            // 	res.send({
-            // 		status: 200,
-            // 		message: `Successful DB connection.`,
-            // 		data: data[0],
-            // 	});
-            // } else {
-            // 	res.send({
-            // 		status: 400,
-            // 		message: `The submitted temporary password is incorrect.`
-            // 	});
-            // }
-            DBResultsFoundResponse(data, res);
+            if (data[0]) {
+                res.send({
+                    status: 200,
+                    message: `Successful DB connection.`,
+                    data: data[0],
+                });
+            }
+            else {
+                res.send({
+                    status: 400,
+                    message: `The submitted temporary password is incorrect.`
+                });
+            }
             console.log(data);
         }).catch((err) => {
             res.send({
@@ -287,12 +271,22 @@ app.get('/get-user-by-email/:key/:email', (req, res) => {
         const email = req.params.email;
         DB.getUser('users', 'email', email)
             .then((data) => {
-            res.send({
-                status: 200,
-                message: 'User Retrieved',
-                data: data[0]
-            });
-            console.log('The user\'s data has been retrieved ', data);
+            if (data[0]) {
+                res.send({
+                    status: 200,
+                    message: "User Retrieved",
+                    data: data[0],
+                });
+                console.log("The user's data has been retrieved.", data);
+            }
+            else {
+                res.send({
+                    status: 400,
+                    message: 'This user could not be found',
+                    data: data
+                });
+                console.log("The user's data could not be found. ", data);
+            }
         })
             .catch((err) => {
             res.send({
@@ -312,11 +306,20 @@ app.get('/username/:key/:username', (req, res) => {
         const username = req.params.username;
         DB.getUser('users', 'username', username)
             .then((data) => {
-            res.send({
-                status: 200,
-                message: 'User retrieved',
-                data: data
-            });
+            if (data[0]) {
+                res.send({
+                    status: 200,
+                    message: "User retrieved",
+                    data: data,
+                });
+            }
+            else {
+                res.send({
+                    status: 400,
+                    message: "User could not be found with the provided username.",
+                    data: data,
+                });
+            }
             console.log(`${username} was found in the database `, data);
         })
             .catch((error) => {

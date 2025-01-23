@@ -208,7 +208,6 @@ app.get("/get-valid-user/:key/:email/:password", (req: Request, res: Response): 
 						message: `Invalid user passed`,
 					});
 				}
-				
 			})
 			.catch((err: SQLResponse): void => {
 				res.send({
@@ -272,10 +271,8 @@ app.put("/set-random-password/:key", (req: Request, res: Response): void => {
 					message: `Temp password has been sent`,
 					data: data
 				});
-
 				console.log("temp password created.");
 			})
-
 			.catch((err: SQLResponse | any): void => {
 				res.send({
 					status: 500,
@@ -297,12 +294,22 @@ app.get('/get-user-by-email/:key/:email', (req: Request, res: Response): void =>
 
 		DB.getUser('users', 'email', email)
 			.then((data: string[]): void => {
-				res.send({
-					status: 200,
-					message: 'User Retrieved',
-					data: data[0]
-				});
-				console.log('The user\'s data has been retrieved ', data);
+
+				if (data[0]) {
+					res.send({
+						status: 200,
+						message: "User Retrieved",
+						data: data[0],
+					});
+					console.log("The user's data has been retrieved.", data);
+				} else {
+					res.send({
+						status: 400,
+						message: 'This user could not be found',
+						data: data
+					});
+					console.log("The user's data could not be found. ", data);
+				}
 			})
 			.catch((err: SQLResponse): void => {
 				res.send({
@@ -324,11 +331,19 @@ app.get('/username/:key/:username', (req: Request, res: Response): void => {
 
 		DB.getUser('users', 'username', username)
 			.then((data: string[]): void => {
-				res.send({
-					status: 200,
-					message: 'User retrieved',
-					data: data
-				});
+				if (data[0]) {
+					res.send({
+						status: 200,
+						message: "User retrieved",
+						data: data,
+					});
+				} else {
+					res.send({
+						status: 400,
+						message: "User could not be found with the provided username.",
+						data: data,
+					});
+				}
 				console.log(`${username} was found in the database `, data);
 			})
 			.catch((error: SQLResponse): void => {
