@@ -178,11 +178,19 @@ app.get("/get-valid-user/:key/:email/:password", (req, res) => {
         const userEmail = req.params.email;
         DB.getValidUser("users", "email", userEmail, "password", encodedPassword)
             .then((data) => {
-            res.send({
-                status: 200,
-                message: `Valid user`,
-                data: data[0],
-            });
+            if (data[0]) {
+                res.send({
+                    status: 200,
+                    message: `Valid user`,
+                    data: data[0],
+                });
+            }
+            else {
+                res.send({
+                    status: 400,
+                    message: `Invalid user passed`,
+                });
+            }
         })
             .catch((err) => {
             res.send({
@@ -190,6 +198,40 @@ app.get("/get-valid-user/:key/:email/:password", (req, res) => {
                 message: `The following error has occurred in validating ${userEmail} ${DB.getSqlError(err)}`,
             });
             console.log("Error in get valid user ", err);
+        });
+    }
+    else {
+        res.send(invalidKeyResponse);
+    }
+});
+app.get('/get-user-with-temp-password/:key/:email/:tempPassword', (req, res) => {
+    if (req.params.key === ApiKey) {
+        const DB = new databaseClass_1.DBMethods(dbHost, dbUser, dbName, dbPassword);
+        const password = new EncryptClass_1.default(req.params.tempPassword);
+        const encodedPassword = password.getEncodedPassword();
+        const userEmail = req.params.email;
+        console.log('Temp here ', req.params.tempPassword);
+        DB.getValidUser("users", "email", userEmail, "tempPassword", encodedPassword).then((data) => {
+            if (data[0]) {
+                res.send({
+                    status: 200,
+                    message: `Successful DB connection.`,
+                    data: data[0],
+                });
+            }
+            else {
+                res.send({
+                    status: 400,
+                    message: `The submitted temporary password is incorrect.`
+                });
+            }
+            console.log(data);
+        }).catch((err) => {
+            res.send({
+                status: 500,
+                message: `The following error occurred in validating the user with the email ${userEmail}: ${DB.getSqlError(err)}`
+            });
+            console.log('Error in getting valid user with temp password ', err);
         });
     }
     else {

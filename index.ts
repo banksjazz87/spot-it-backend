@@ -195,11 +195,19 @@ app.get("/get-valid-user/:key/:email/:password", (req: Request, res: Response): 
 
 		DB.getValidUser("users", "email", userEmail, "password", encodedPassword)
 			.then((data: string[]): void => {
-				res.send({
-					status: 200,
-					message: `Valid user`,
-					data: data[0],
-				});
+
+				if (data[0]) {
+					res.send({
+						status: 200,
+						message: `Valid user`,
+						data: data[0],
+					});
+				} else {
+					res.send({
+						status: 400,
+						message: `Invalid user passed`,
+					});
+				}
 			})
 			.catch((err: SQLResponse): void => {
 				res.send({
@@ -216,16 +224,26 @@ app.get("/get-valid-user/:key/:email/:password", (req: Request, res: Response): 
 app.get('/get-user-with-temp-password/:key/:email/:tempPassword', (req: Request, res: Response): void => {
 	if (req.params.key === ApiKey) {
 		const DB = new DBMethods(dbHost, dbUser, dbName, dbPassword);
-		const password = new EncryptClass(req.params.password);
+		const password = new EncryptClass(req.params.tempPassword);
 		const encodedPassword = password.getEncodedPassword();
 		const userEmail = req.params.email;
 
+
+		console.log('Temp here ', req.params.tempPassword);
 		DB.getValidUser("users", "email", userEmail, "tempPassword", encodedPassword).then((data: string[]): void => {
-			res.send({
-				status: 200,
-				message: `The user with email: ${userEmail} is a valid user.`,
-				data: data[0]
-			});
+			if (data[0]) {
+				res.send({
+					status: 200,
+					message: `Successful DB connection.`,
+					data: data[0],
+				});
+			} else {
+				res.send({
+					status: 400,
+					message: `The submitted temporary password is incorrect.`
+				});
+			}
+			
 			console.log(data);
 		}).catch((err: SQLResponse): void => {
 			res.send({
