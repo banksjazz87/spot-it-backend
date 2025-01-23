@@ -28,6 +28,22 @@ const invalidKeyResponse = {
     valid: false,
     message: "Please provide a valid API key",
 };
+const DBResultsFoundResponse = (dataArray, res) => {
+    if (dataArray[0]) {
+        res.send({
+            status: 200,
+            message: 'Results found.',
+            data: dataArray
+        });
+    }
+    else {
+        res.send({
+            status: 400,
+            message: 'No results found',
+            data: dataArray
+        });
+    }
+};
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
@@ -178,19 +194,19 @@ app.get("/get-valid-user/:key/:email/:password", (req, res) => {
         const userEmail = req.params.email;
         DB.getValidUser("users", "email", userEmail, "password", encodedPassword)
             .then((data) => {
-            if (data[0]) {
-                res.send({
-                    status: 200,
-                    message: `Valid user`,
-                    data: data[0],
-                });
-            }
-            else {
-                res.send({
-                    status: 400,
-                    message: `Invalid user passed`,
-                });
-            }
+            // if (data[0]) {
+            // 	res.send({
+            // 		status: 200,
+            // 		message: `Valid user`,
+            // 		data: data[0],
+            // 	});
+            // } else {
+            // 	res.send({
+            // 		status: 400,
+            // 		message: `Invalid user passed`,
+            // 	});
+            // }
+            DBResultsFoundResponse(data, res);
         })
             .catch((err) => {
             res.send({
@@ -212,19 +228,19 @@ app.get('/get-user-with-temp-password/:key/:email/:tempPassword', (req, res) => 
         const userEmail = req.params.email;
         console.log('Temp here ', req.params.tempPassword);
         DB.getValidUser("users", "email", userEmail, "tempPassword", encodedPassword).then((data) => {
-            if (data[0]) {
-                res.send({
-                    status: 200,
-                    message: `Successful DB connection.`,
-                    data: data[0],
-                });
-            }
-            else {
-                res.send({
-                    status: 400,
-                    message: `The submitted temporary password is incorrect.`
-                });
-            }
+            // if (data[0]) {
+            // 	res.send({
+            // 		status: 200,
+            // 		message: `Successful DB connection.`,
+            // 		data: data[0],
+            // 	});
+            // } else {
+            // 	res.send({
+            // 		status: 400,
+            // 		message: `The submitted temporary password is incorrect.`
+            // 	});
+            // }
+            DBResultsFoundResponse(data, res);
             console.log(data);
         }).catch((err) => {
             res.send({

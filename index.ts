@@ -32,6 +32,7 @@ const invalidKeyResponse = {
 	message: "Please provide a valid API key",
 };
 
+
 app.listen(port, (): void => {
 	console.log(`Server is running on port ${port}`);
 });
@@ -195,7 +196,6 @@ app.get("/get-valid-user/:key/:email/:password", (req: Request, res: Response): 
 
 		DB.getValidUser("users", "email", userEmail, "password", encodedPassword)
 			.then((data: string[]): void => {
-
 				if (data[0]) {
 					res.send({
 						status: 200,
@@ -208,6 +208,7 @@ app.get("/get-valid-user/:key/:email/:password", (req: Request, res: Response): 
 						message: `Invalid user passed`,
 					});
 				}
+				
 			})
 			.catch((err: SQLResponse): void => {
 				res.send({
@@ -243,7 +244,6 @@ app.get('/get-user-with-temp-password/:key/:email/:tempPassword', (req: Request,
 					message: `The submitted temporary password is incorrect.`
 				});
 			}
-			
 			console.log(data);
 		}).catch((err: SQLResponse): void => {
 			res.send({
