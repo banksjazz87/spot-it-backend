@@ -75,14 +75,24 @@ app.put("/update-user/:key", (req, res) => {
         const DB = new databaseClass_1.DBMethods(dbHost, dbUser, dbName, dbPassword);
         const password = new EncryptClass_1.default(req.body.password);
         const encodedPassword = password.getEncodedPassword();
-        DB.updatePerson("users", req.body, encodedPassword)
+        DB.updatePerson("users", req.body, 'id', encodedPassword, 'password')
             .then((data) => {
-            res.send({
-                status: 200,
-                message: `${req.body.username} has been updated.`,
-                data: data
-            });
-            console.log("Successfully updated the user.");
+            if (data['affectedRows'] !== 0) {
+                res.send({
+                    status: 200,
+                    message: `${req.body.username} has been updated.`,
+                    data: data,
+                });
+                console.log("Successfully updated the user.");
+            }
+            else {
+                res.send({
+                    status: 400,
+                    message: `${req.body.username} was not able to be updated..`,
+                    data: data,
+                });
+                console.log("Failed to update the user.");
+            }
         })
             .catch((err) => {
             res.send({

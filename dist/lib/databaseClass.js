@@ -105,11 +105,24 @@ class DBMethods {
             this.endDb();
         });
     }
-    updatePerson(tableName, obj, newPassword) {
+    updatePerson(tableName, columnsAndValues, idCol, newPassword, passwordCol) {
         return new Promise((resolve, reject) => {
             const database = this.dbConnection;
-            const neededSql = `UPDATE ${tableName} SET username = "${obj.username}", email = "${obj.email}", password = "${newPassword}" WHERE id = ${obj.id};`;
-            database.query(neededSql, (err, results) => {
+            //Start building our update statement.
+            let updateStatement = '';
+            for (const property in columnsAndValues) {
+                if (property !== idCol || property !== passwordCol) {
+                    updateStatement += `${property} = "${columnsAndValues[property]}", `;
+                }
+            }
+            if (newPassword && passwordCol) {
+                updateStatement += `${passwordCol} = "${newPassword}"`;
+            }
+            else {
+                updateStatement = updateStatement.substring(0, updateStatement.length - 2);
+            }
+            const finalSQL = `UPDATE ${tableName} SET ${updateStatement} WHERE id = ${columnsAndValues["id"]}`;
+            database.query(finalSQL, (err, results) => {
                 err ? reject(err) : resolve(results);
             });
             this.endDb();

@@ -11,3 +11,14 @@ export interface DBUser {
     loggedIn: number;
     lastLoggedIn: string;
 }
+
+export interface FullSQLResponse {
+    fieldCount: number;
+    affectedRows: number;
+    insertId: number;
+    serverStatus: number;
+    warningCount: number;
+    message: string;
+    protocol41: boolean;
+    changedRows: number;
+}

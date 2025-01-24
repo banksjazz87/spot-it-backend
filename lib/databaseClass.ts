@@ -124,12 +124,31 @@ export class DBMethods {
 		});
 	}
 
-	updatePerson(tableName: string, obj: DBUser, newPassword: string): Promise<string[]> {
+
+	updatePerson(tableName: string, columnsAndValues: Object, idCol: string, newPassword?: string, passwordCol?: string): Promise<string[]> {
 		return new Promise<string[]>((resolve, reject) => {
 			const database = this.dbConnection;
-			const neededSql = `UPDATE ${tableName} SET username = "${obj.username}", email = "${obj.email}", password = "${newPassword}" WHERE id = ${obj.id};`;
 
-			database.query(neededSql, (err: string[], results: string[]) => {
+			//Start building our update statement.
+			let updateStatement = '';
+			
+			//Build our statement
+			for (const property in columnsAndValues) {
+				if (property !== idCol || property !== passwordCol) {
+					updateStatement += `${property} = "${columnsAndValues[property as keyof typeof columnsAndValues]}", `;
+				}
+			}
+
+			//Check if new password and password column were passed in the parameters
+			if (newPassword && passwordCol) {
+				updateStatement += `${passwordCol} = "${newPassword}"`;
+			} else {
+				updateStatement = updateStatement.substring(0, updateStatement.length - 2);
+			}
+			
+			const finalSQL = `UPDATE ${tableName} SET ${updateStatement} WHERE id = ${columnsAndValues["id" as keyof typeof columnsAndValues]}`;
+
+			database.query(finalSQL, (err: string[], results: string[]) => {
 				err ? reject(err) : resolve(results);
 			});
 			this.endDb();
