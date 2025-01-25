@@ -214,14 +214,14 @@ app.get("/get-valid-user/:key/:email/:password", (req, res) => {
         res.send(invalidKeyResponse);
     }
 });
-app.get('/get-user-with-temp-password/:key/:email/:tempPassword', (req, res) => {
+app.get('/get-user-with-temp-password/:key/:id/:tempPassword', (req, res) => {
     if (req.params.key === ApiKey) {
         const DB = new databaseClass_1.DBMethods(dbHost, dbUser, dbName, dbPassword);
         const password = new EncryptClass_1.default(req.params.tempPassword);
         const encodedPassword = password.getEncodedPassword();
-        const userEmail = req.params.email;
+        const userId = req.params.id;
         console.log('Temp here ', req.params.tempPassword);
-        DB.getValidUser("users", "email", userEmail, "tempPassword", encodedPassword).then((data) => {
+        DB.getValidUser("users", "id", userId, "tempPassword", encodedPassword).then((data) => {
             if (data[0]) {
                 res.send({
                     status: 200,

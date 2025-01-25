@@ -110,11 +110,13 @@ class DBMethods {
             const database = this.dbConnection;
             //Start building our update statement.
             let updateStatement = '';
+            //Build our statement
             for (const property in columnsAndValues) {
                 if (property !== idCol || property !== passwordCol) {
                     updateStatement += `${property} = "${columnsAndValues[property]}", `;
                 }
             }
+            //Check if new password and password column were passed in the parameters
             if (newPassword && passwordCol) {
                 updateStatement += `${passwordCol} = "${newPassword}"`;
             }

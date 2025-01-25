@@ -230,16 +230,16 @@ app.get("/get-valid-user/:key/:email/:password", (req: Request, res: Response): 
 	}
 });
 
-app.get('/get-user-with-temp-password/:key/:email/:tempPassword', (req: Request, res: Response): void => {
+app.get('/get-user-with-temp-password/:key/:id/:tempPassword', (req: Request, res: Response): void => {
 	if (req.params.key === ApiKey) {
 		const DB = new DBMethods(dbHost, dbUser, dbName, dbPassword);
 		const password = new EncryptClass(req.params.tempPassword);
 		const encodedPassword = password.getEncodedPassword();
-		const userEmail = req.params.email;
+		const userId = req.params.id;
 
 
 		console.log('Temp here ', req.params.tempPassword);
-		DB.getValidUser("users", "email", userEmail, "tempPassword", encodedPassword).then((data: string[]): void => {
+		DB.getValidUser("users", "id", userId, "tempPassword", encodedPassword).then((data: string[]): void => {
 			if (data[0]) {
 				res.send({
 					status: 200,
@@ -256,7 +256,7 @@ app.get('/get-user-with-temp-password/:key/:email/:tempPassword', (req: Request,
 		}).catch((err: SQLResponse): void => {
 			res.send({
 				status: 500,
-				message: `The following error occurred in validating the user with the email ${userEmail}: ${DB.getSqlError(err)}`
+				message: `The following error occurred in validating the user: ${DB.getSqlError(err)}`
 			});
 			console.log('Error in getting valid user with temp password ', err);
 		})
